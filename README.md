@@ -52,7 +52,7 @@ This is required for the workflow to POST requests via the API without a browser
 
 - Open n8n
 - Go to **Workflows → Import**
-- Upload `Netflix-TOP10-Seerr.json`
+- Upload `Netflix-top10-seerr.json`
 
 ### 5. Fill in your credentials
 
