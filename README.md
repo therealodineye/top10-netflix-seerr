@@ -20,7 +20,7 @@ Every day at 08:00, the workflow:
 
 - [n8n](https://n8n.io) (self-hosted, tested on v2.15.0)
 - [Seerr](https://github.com/seerr-team/seerr) or [Overseerr](https://github.com/sct/overseerr)
-- CSRF Protection **disabled** in Seerr (Settings → General → uncheck Enable CSRF Protection)
+- CSRF Protection **disabled** in Seerr (Settings → Network Settings → uncheck Enable CSRF Protection)
 
 ---
 
@@ -42,7 +42,7 @@ The workflow authenticates as a dedicated low-permission user so that requests a
 
 ### 3. Disable CSRF Protection
 
-- Go to **Seerr → Settings → General**
+- Go to **Seerr → Settings → Network Settings**
 - Uncheck **Enable CSRF Protection**
 - Save
 
