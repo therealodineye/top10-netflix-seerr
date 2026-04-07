@@ -194,7 +194,7 @@ Usually means the seasons array is malformed. Check the **Fetch TV Seasons** nod
 This is a Seerr configuration issue, not a workflow issue. Verify your Radarr/Sonarr connections are set up correctly in Seerr settings.
 
 ---
-
+Make sure you have the rights to download the media if you do so. This code is just for educational purpose!
 ## Credits
 
 Built with [n8n](https://n8n.io) and data from [FlixPatrol](https://flixpatrol.com).
