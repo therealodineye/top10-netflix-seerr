@@ -6,7 +6,7 @@ Automatically request the daily Netflix Top 10 movies and TV shows into your [Se
 
 Every day at 08:00, the workflow:
 
-1. Fetches the Netflix Top 10 for your chosen country from FlixPatrol
+1. Fetches the Netflix Top 10 for your chosen country from FlixPatrol (Amazon Prime, HBO etc. is also supported | Scroll down)
 2. Parses the HTML to extract the top 10 movies and top 10 TV shows
 3. Searches each title in Seerr to check if it already exists or has been requested
 4. Skips anything already pending, processing, or available
