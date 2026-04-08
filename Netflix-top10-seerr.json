@@ -1,3 +1,11 @@
+# This workflow checks the daily Netflix Norway Top10 list from FlixPatrol, searches for each title in Seerr, and if not already requested or available, it will automatically request it. For TV shows, it will request the latest season.
+# To use this workflow:
+# 1. Replace YOUR_SEERR_HOST with your Seerr instance URL.
+# 2. Replace YOUR_SEERR_API_KEY with your Seerr API key.
+# 3. Replace YOUR_BOT_EMAIL and YOUR_BOT_PASSWORD with the credentials of a bot user in Seerr that has permissions to make requests.
+# The workflow runs daily at 08:00 and processes the top 10 movies and top 10 TV shows from the Netflix Norway Top10 list. It checks each title's status in Seerr and only makes a request if it's not already available or requested. For TV shows, it requests the latest season available in Seerr.
+
+
 {
   "name": "Netflix Norway Top10 \u2192 Seerr",
   "nodes": [
