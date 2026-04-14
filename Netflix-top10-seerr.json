@@ -1,23 +1,7 @@
-# This workflow checks the daily Netflix Norway Top10 list from FlixPatrol, searches for each title in Seerr, and if not already requested or available, it will automatically request it. For TV shows, it will request the latest season.
-# To use this workflow:
-# 1. Replace YOUR_SEERR_HOST with your Seerr instance URL.
-# 2. Replace YOUR_SEERR_API_KEY with your Seerr API key.
-# 3. Replace YOUR_BOT_EMAIL and YOUR_BOT_PASSWORD with the credentials of a bot user in Seerr that has permissions to make requests.
-# The workflow runs daily at 08:00 and processes the top 10 movies and top 10 TV shows from the Netflix Norway Top10 list. It checks each title's status in Seerr and only makes a request if it's not already available or requested. For TV shows, it requests the latest season available in Seerr.
-
-
 {
-  "name": "Netflix Norway Top10 \u2192 Seerr",
+  "name": "Netflix Norway Top10 → Seerr",
   "nodes": [
     {
-      "id": "node-001",
-      "name": "Daily 08:00",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1,
-      "position": [
-        240,
-        300
-      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -27,20 +11,19 @@
             }
           ]
         }
-      }
+      },
+      "id": "2d12a38d-4340-4bd2-8aa2-3b2e28755b0f",
+      "name": "Daily 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1616,
+        80
+      ]
     },
     {
-      "id": "node-002",
-      "name": "Fetch FlixPatrol",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        460,
-        300
-      ],
       "parameters": {
-        "method": "GET",
-        "url": "=https://flixpatrol.com/top10/netflix/norway/{{ $now.format('yyyy-MM-dd') }}/",
+        "url": "https://flixpatrol.com/top10/netflix/norway/",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -57,49 +40,46 @@
             }
           }
         }
-      }
+      },
+      "id": "9f277e2b-0eed-4766-87b3-0c8badeb7ea2",
+      "name": "Fetch FlixPatrol",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -1408,
+        80
+      ]
     },
     {
-      "id": "node-003",
+      "parameters": {
+        "jsCode": "const html = $input.first().json.data;\n\nconst matches = [\n  ...html.matchAll(\n    /table-hover:text-gray-400\">\\s*(\\d+)\\.\\s*<\\/td>.*?href=\"\\/title\\/[^\"]+\"\\s*class=\"hover:underline\">([^<]+)<\\/a>/gs\n  )\n];\n\nconst titles = matches.map(m => ({\n  rank: parseInt(m[1]),\n  title: m[2]\n    .replace(/&amp;/g, '&')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&#039;/g, \"'\")\n    .trim()\n}));\n\nconst movies = titles.slice(0, 10).map(t => ({ ...t, mediaType: 'movie' }));\nconst shows  = titles.slice(10, 20).map(t => ({ ...t, mediaType: 'tv' }));\n\nreturn [{ json: { titles: [...movies, ...shows] } }];"
+      },
+      "id": "57d6df8c-1fc2-4145-b4e8-131192b50f43",
       "name": "Parse Top10 Titles",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        680,
-        300
-      ],
-      "parameters": {
-        "mode": "runOnceForAllItems",
-        "jsCode": "const html = $input.first().json.data;\n\nconst matches = [\n  ...html.matchAll(\n    /table-hover:text-gray-400\">\\s*(\\d+)\\.\\s*<\\/td>.*?href=\"\\/title\\/[^\"]+\"\\s*class=\"hover:underline\">([^<]+)<\\/a>/gs\n  )\n];\n\nconst titles = matches.map(m => ({\n  rank: parseInt(m[1]),\n  title: m[2]\n    .replace(/&amp;/g, '&')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&#039;/g, \"'\")\n    .trim()\n}));\n\nconst movies = titles.slice(0, 10).map(t => ({ ...t, mediaType: 'movie' }));\nconst shows  = titles.slice(10, 20).map(t => ({ ...t, mediaType: 'tv' }));\n\nreturn [{ json: { titles: [...movies, ...shows] } }];"
-      }
+        -1184,
+        80
+      ]
     },
     {
-      "id": "node-004",
+      "parameters": {
+        "fieldToSplitOut": "titles",
+        "options": {}
+      },
+      "id": "11005f95-3b18-47c4-8c65-f8024a3978a6",
       "name": "Split Titles",
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        900,
-        300
-      ],
-      "parameters": {
-        "fieldToSplitOut": "titles",
-        "options": {}
-      }
+        -960,
+        80
+      ]
     },
     {
-      "id": "node-005",
-      "name": "Search Seerr",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        1120,
-        300
-      ],
-      "continueOnFail": true,
       "parameters": {
-        "method": "GET",
-        "url": "http://YOUR_SEERR_HOST:5055/api/v1/search",
+        "url": "http://YOUR_OVERSEERR_IP:5055/api/v1/search",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -122,36 +102,37 @@
           "parameters": [
             {
               "name": "X-Api-Key",
-              "value": "YOUR_SEERR_API_KEY"
+              "value": "YOUR_OVERSEERR_API_KEY"
             }
           ]
         },
         "options": {}
-      }
+      },
+      "id": "45cdfe9a-fb11-4289-8d53-51dfcd285d2e",
+      "name": "Search Seerr",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -736,
+        80
+      ],
+      "continueOnFail": true
     },
     {
-      "id": "node-006",
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const search   = $input.item.json;\nconst original = $('Split Titles').item.json;\n\nif (search.error) {\n  return { json: { shouldRequest: false, title: original.title, reason: 'search error' } };\n}\n\nconst results   = search.results || [];\nconst mediaType = original.mediaType;\n\nconst match = results.find(r => r.mediaType === mediaType) || results[0];\n\nif (!match) {\n  return { json: { shouldRequest: false, title: original.title, reason: 'no results' } };\n}\n\nconst status        = match.mediaInfo?.status ?? 0;\nconst shouldRequest = status < 2;\n\nreturn { json: {\n  shouldRequest,\n  mediaId:       match.id,\n  mediaType:     match.mediaType,\n  title:         match.title || match.name,\n  currentStatus: status\n} };"
+      },
+      "id": "157fad6e-7bae-420c-bc2e-53fa5016423a",
       "name": "Check Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1340,
-        300
-      ],
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "const search   = $input.item.json;\nconst original = $('Split Titles').item.json;\n\nif (search.error) {\n  return { json: { shouldRequest: false, title: original.title, reason: 'search error' } };\n}\n\nconst results   = search.results || [];\nconst mediaType = original.mediaType;\n\nconst match = results.find(r => r.mediaType === mediaType) || results[0];\n\nif (!match) {\n  return { json: { shouldRequest: false, title: original.title, reason: 'no results' } };\n}\n\nconst status        = match.mediaInfo?.status ?? 0;\nconst shouldRequest = status < 2;\n\nreturn { json: {\n  shouldRequest,\n  mediaId:       match.id,\n  mediaType:     match.mediaType,\n  title:         match.title || match.name,\n  currentStatus: status\n} };"
-      }
+        -528,
+        80
+      ]
     },
     {
-      "id": "node-007",
-      "name": "Not Yet Requested?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        1560,
-        300
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -170,47 +151,46 @@
             }
           ],
           "combinator": "and"
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "97ff8ef3-58ca-46d9-b676-edba2d77b91c",
+      "name": "Not Yet Requested?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        80
+      ]
     },
     {
-      "id": "node-010",
-      "name": "Fetch TV Seasons",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        1780,
-        220
-      ],
-      "continueOnFail": true,
       "parameters": {
-        "method": "GET",
-        "url": "=http://YOUR_SEERR_HOST:5055/api/v1/{{ $json.mediaType === 'tv' ? 'tv' : 'movie' }}/{{ $json.mediaId }}",
+        "url": "=http://YOUR_OVERSEERR_IP:5055/api/v1/{{ $json.mediaType === 'tv' ? 'tv' : 'movie' }}/{{ $json.mediaId }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "X-Api-Key",
-              "value": "YOUR_SEERR_API_KEY"
+              "value": "YOUR_OVERSEERR_API_KEY"
             }
           ]
         },
         "options": {}
-      }
-    },
-    {
-      "id": "node-009",
-      "name": "Login Bot User",
+      },
+      "id": "549bc4d1-120e-4861-aa90-570c0371021f",
+      "name": "Fetch TV Seasons",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        2000,
-        220
+        -80,
+        0
       ],
-      "continueOnFail": true,
+      "continueOnFail": true
+    },
+    {
       "parameters": {
         "method": "POST",
-        "url": "http://YOUR_SEERR_HOST:5055/api/v1/auth/local",
+        "url": "http://YOUR_OVERSEERR_IP:5055/api/v1/auth/local",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -223,7 +203,7 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "{\"email\":\"YOUR_BOT_EMAIL\",\"password\":\"YOUR_BOT_PASSWORD\"}",
+        "body": "{\"email\":\"YOUR_OVERSEERR_EMAIL\",\"password\":\"YOUR_OVERSEERR_PASSWORD\"}",
         "options": {
           "response": {
             "response": {
@@ -231,21 +211,21 @@
             }
           }
         }
-      }
-    },
-    {
-      "id": "node-008",
-      "name": "Request in Seerr",
+      },
+      "id": "3aa07388-fbad-4601-8844-0c2da69e953a",
+      "name": "Login Bot User",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        2220,
-        220
+        144,
+        0
       ],
-      "continueOnFail": true,
+      "continueOnFail": true
+    },
+    {
       "parameters": {
         "method": "POST",
-        "url": "http://YOUR_SEERR_HOST:5055/api/v1/request",
+        "url": "http://YOUR_OVERSEERR_IP:5055/api/v1/request",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -264,9 +244,19 @@
         "rawContentType": "application/json",
         "body": "={{ JSON.stringify({ mediaType: $('Not Yet Requested?').item.json.mediaType, mediaId: $('Not Yet Requested?').item.json.mediaId, ...($('Not Yet Requested?').item.json.mediaType === 'tv' ? { seasons: [($('Fetch TV Seasons').item.json.seasons || []).map(s => s.seasonNumber).filter(n => n > 0).sort((a,b) => a - b).pop()].filter(Boolean) } : {}) }) }}",
         "options": {}
-      }
+      },
+      "id": "f0ee9906-267d-4a20-94be-722f7bf089b8",
+      "name": "Request in Seerr",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        368,
+        0
+      ],
+      "continueOnFail": true
     }
   ],
+  "pinData": {},
   "connections": {
     "Daily 08:00": {
       "main": [
@@ -342,8 +332,7 @@
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     },
     "Fetch TV Seasons": {
@@ -369,7 +358,15 @@
       ]
     }
   },
+  "active": false,
   "settings": {
-    "executionOrder": "v1"
-  }
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ccef7c99-c134-4820-81ce-604f807e30b0",
+  "meta": {
+    "instanceId": "REPLACE_WITH_YOUR_INSTANCE_ID"
+  },
+  "id": "scktYFnd6h9MMmYB",
+  "tags": []
 }
